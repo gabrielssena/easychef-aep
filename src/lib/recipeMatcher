@@ -1,0 +1,45 @@
+import { recipes, type Recipe } from "../data/recipes";
+import { normalizeIngredient } from "./ingredients";
+
+export interface RecipeMatch {
+  recipe: Recipe;
+  matchCount: number;
+  matchedIngredients: string[];
+  missingIngredients: string[];
+  score: number;
+}
+
+function ingredientMatches(recipeIngredient: string, availableIngredient: string) {
+  const recipeValue = normalizeIngredient(recipeIngredient);
+  const availableValue = normalizeIngredient(availableIngredient);
+
+  return recipeValue.includes(availableValue) || availableValue.includes(recipeValue);
+}
+
+export function getRecipeMatch(recipe: Recipe, availableIngredients: string[]): RecipeMatch {
+  const matchedIngredients = recipe.ingredients.filter((ingredient) =>
+    availableIngredients.some((available) => ingredientMatches(ingredient, available)),
+  );
+
+  const missingIngredients = recipe.ingredients.filter(
+    (ingredient) => !matchedIngredients.includes(ingredient),
+  );
+
+  const matchRatio = matchedIngredients.length / recipe.ingredients.length;
+  const score = matchedIngredients.length * 10 + matchRatio * 20 - missingIngredients.length;
+
+  return {
+    recipe,
+    matchCount: matchedIngredients.length,
+    matchedIngredients,
+    missingIngredients,
+    score,
+  };
+}
+
+export function matchRecipes(availableIngredients: string[]) {
+  return recipes
+    .map((recipe) => getRecipeMatch(recipe, availableIngredients))
+    .filter((match) => match.matchCount > 0)
+    .sort((a, b) => b.score - a.score || b.recipe.savedFoodKg - a.recipe.savedFoodKg);
+}
