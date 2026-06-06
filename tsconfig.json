@@ -16,5 +16,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "../Gabriel/commit-1-routing/css-modules.d.ts", "../Gabriel/commit-1-routing/tabs_layout.tsx"  ]
 }
